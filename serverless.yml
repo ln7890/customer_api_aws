@@ -1,0 +1,64 @@
+Resource: customer-mgt-api/serverless.yml
+
+service: customer-api
+
+# frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-north-1
+  stage: ${opt:stage, 'dev'}
+
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+    STAGE: ${opt:stage, 'dev'}
+    CUSTOMERS_TABLE: ${self:service}-${self:provider.stage}-customers-table
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:eu-north-1:957388138177:table/customer_mgt
+
+functions:
+  createCustomer:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
+resources:
+  Resources:
+    CustomersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CUSTOMERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+Transform: AWS::Serverless-2016-10-31
+
+# plugins:
+#   - serverless-esbuild
+
+# custom:
+#   esbuild:
+#     bundle: true
+#     platform: node
+#     target: node18
+#     tsconfig: tsconfig.json
