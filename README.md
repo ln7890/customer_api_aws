@@ -20,7 +20,8 @@ Serverless backend for managing customers, built with **TypeScript**, **NestJS**
 
 ## Install & Run
 ```bash
-git clone https://github.com/your-username/customer-serverless.git
+git clone https://github.com/ln7890/customer-serverless.git
+
 cd customer-serverless
 npm install
 npm run start:dev
